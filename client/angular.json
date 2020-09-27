@@ -71,7 +71,7 @@
           "options": {
             "browserTarget": "client:build",
             "sslKey": "ssl/server.key",
-            "sslCert": "ssl/localcert.cer",
+            "sslCert": "ssl/bc.cer",
             "ssl": true
           },
           "configurations": {
