@@ -1,0 +1,9 @@
+<div class="container mt-5">
+    <h4>Internal Server Error - refreshing the page will make the exception disappear </h4>
+    <ng-container *ngIf="error">
+        <h5 class="text-danger">Error: {{error.message}}</h5>
+        <p class="font-weight-bold">If you are seeing this,then the problem is originated from server side</p>
+        <p>what to do next?</p>
+    </ng-container>
+    
+</div>
