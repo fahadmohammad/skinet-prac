@@ -30,7 +30,7 @@ export class AppComponent implements OnInit {
   loadBasket() {
     const basketId = localStorage.getItem('basket_id');
     if (basketId) {
-      this.basketService.getBusket(basketId).subscribe(() => {
+      this.basketService.getBasket(basketId).subscribe(() => {
         console.log('basket initialized');
       }, error => {
         console.log(error);

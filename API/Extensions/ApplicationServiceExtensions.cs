@@ -5,6 +5,7 @@ using Infrastructure.Data;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace API.Extensions
 {
@@ -20,6 +21,7 @@ namespace API.Extensions
             services.AddScoped(typeof(IGenericRepository<>),(typeof(GenericRepository<>)));
 
             services.AddScoped<IUnitOfWork,UnitOfWork>();
+            services.AddScoped<IPaymentService,PaymentService>();           
 
             services.Configure<ApiBehaviorOptions>(options => 
             {
