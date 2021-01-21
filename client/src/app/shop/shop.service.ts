@@ -8,6 +8,7 @@ import { ShopParams } from '../shared/models/shopParams';
 import { IProduct } from '../shared/models/product';
 import { of } from 'rxjs';
 import { Params } from '@angular/router';
+import { environment } from 'src/environments/environment';
 
 
 @Injectable({
@@ -15,7 +16,7 @@ import { Params } from '@angular/router';
 })
 export class ShopService {
 
-  baseUrl = 'https://localhost:5001/api/';
+  baseUrl = environment.apiUrl;
   
   products: IProduct[] = [];
   brands: IBrand[] = [];
