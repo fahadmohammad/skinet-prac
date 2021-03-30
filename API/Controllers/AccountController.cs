@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -132,6 +133,37 @@ namespace API.Controllers
                 Roles = roleList.ToList()
             };
         }
+
+        [HttpPost("add-role")]
+        [Authorize(Roles = "Administrator")]
+        public async Task<ActionResult<string>> AddRole(AddRoleDto roleDto)
+        {
+            var user = await _userManager.FindByEmailAsync(roleDto.Email);
+
+            if (user == null)
+            {
+                return new BadRequestObjectResult(new ApiValidationErrorResponse
+                {
+                    Errors = new[] { "User with the given email not found" }
+                });
+            }
+
+            var roleExists = Enum.GetNames(typeof(AppIdentityDbContextSeed.AppRoles))
+                                    .Any(x => x.ToLower() == roleDto.Role.ToLower());
+
+            if (roleExists)
+            {
+                var validRole = Enum.GetValues(typeof(AppIdentityDbContextSeed.AppRoles)).Cast<AppIdentityDbContextSeed.AppRoles>()
+                                    .Where(x => x.ToString().ToLower() == roleDto.Role.ToLower()).FirstOrDefault();
+
+                await _userManager.AddToRoleAsync(user, validRole.ToString());
+
+                return $"Added {roleDto.Role} to user {roleDto.Email}.";
+            }
+
+            return "Specified Role not found";
+        }
+
     }
 
 

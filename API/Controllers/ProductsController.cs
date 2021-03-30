@@ -33,8 +33,7 @@ namespace API.Controllers
             _mapper = mapper;
         }
         [Cached(600)]
-        [HttpGet]
-        [Authorize(Roles = "Moderator")]
+        [HttpGet]        
         public async Task<ActionResult<Pagination<ProductToReturnDto>>> GetProducts(
             [FromQuery] ProductSpecParam productParams)
         {
