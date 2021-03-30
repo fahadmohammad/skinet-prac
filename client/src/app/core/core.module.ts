@@ -9,7 +9,7 @@ import { ToastrModule } from 'ngx-toastr';
 import { SectionHeaderComponent } from './section-header/section-header.component';
 import { BreadcrumbModule } from 'xng-breadcrumb';
 import { SharedModule } from '../shared/shared.module';
-
+import { NgxNavbarModule } from 'ngx-bootstrap-navbar';
 
 
 @NgModule({
@@ -20,6 +20,7 @@ import { SharedModule } from '../shared/shared.module';
     RouterModule,
     BreadcrumbModule,
     SharedModule,
+    NgxNavbarModule,  
     ToastrModule.forRoot({
       positionClass: 'toast-bottom-right',
       preventDuplicates: true

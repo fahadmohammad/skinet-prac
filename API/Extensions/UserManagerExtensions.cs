@@ -9,21 +9,21 @@ namespace API.Extensions
 {
     public static class UserManagerExtensions
     {
-        public static async Task<AppUser> FindUserByClaimPrincipleWithAddressAsync(this UserManager<AppUser> 
+        public static async Task<AppUser> FindUserByClaimPrincipleWithAddressAsync(this UserManager<AppUser>
             input, ClaimsPrincipal user)
         {
             var email = user?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
 
             return await input.Users.Include(x => x.Address)
                 .SingleOrDefaultAsync(e => e.Email == email);
-        } 
+        }
 
-        public static async Task<AppUser> FindByEmailFromClaimsPrinciple(this UserManager<AppUser> 
+        public static async Task<AppUser> FindByEmailFromClaimsPrinciple(this UserManager<AppUser>
             input, ClaimsPrincipal user)
-            {
-                var email = user?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
+        {
+            var email = user?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
 
-                return await input.Users.SingleOrDefaultAsync(e => e.Email == email);
-            }
+            return await input.Users.SingleOrDefaultAsync(e => e.Email == email);
+        }
     }
 }
