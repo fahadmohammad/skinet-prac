@@ -15,12 +15,15 @@ namespace API.Extensions
             IConfiguration config)
         {
             var builder = services.AddIdentityCore<AppUser>();
-            builder = new Microsoft.AspNetCore.Identity.IdentityBuilder(builder.UserType, services);
+            builder = new Microsoft.AspNetCore.Identity.IdentityBuilder(builder.UserType,
+                        typeof(IdentityRole), services);
+            builder.AddRoles<IdentityRole>();
             builder.AddEntityFrameworkStores<AppIdentityDbContext>();
             builder.AddSignInManager<SignInManager<AppUser>>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options => {
+                .AddJwtBearer(options =>
+                {
 
                     options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                     {
@@ -32,7 +35,7 @@ namespace API.Extensions
                         ValidateAudience = false
                     };
                 });
-            
+
             return services;
         }
     }

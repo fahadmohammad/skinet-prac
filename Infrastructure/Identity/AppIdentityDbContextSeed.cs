@@ -7,9 +7,22 @@ namespace Infrastructure.Identity
 {
     public class AppIdentityDbContextSeed
     {
-        public static async Task SeedUserAsync(UserManager<AppUser> userManager)
+        public enum AppRoles
         {
-            if(!userManager.Users.Any())
+            Administrator,
+            Moderator,
+            User
+        }
+        public static async Task SeedUserAsync(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager)
+        {
+            if (!roleManager.Roles.Any())
+            {
+                await roleManager.CreateAsync(new IdentityRole(AppRoles.Administrator.ToString()));
+                await roleManager.CreateAsync(new IdentityRole(AppRoles.Moderator.ToString()));
+                await roleManager.CreateAsync(new IdentityRole(AppRoles.User.ToString()));
+            }
+
+            if (!userManager.Users.Any())
             {
                 var user = new AppUser
                 {
@@ -28,7 +41,8 @@ namespace Infrastructure.Identity
                     }
                 };
 
-                await userManager.CreateAsync(user,"Pa$$w0rd");
+                await userManager.CreateAsync(user, "Pa$$w0rd");
+                await userManager.AddToRoleAsync(user, AppRoles.Administrator.ToString());
 
             }
         }
