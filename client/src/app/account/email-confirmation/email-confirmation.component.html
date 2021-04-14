@@ -1,0 +1,10 @@
+<div class="card">
+  <div class="card-body">
+    <h1 class="card-title">Email Confirmation</h1>
+    <ul class="text-danger list-unstyled" *ngIf="errors">
+      <li *ngFor="let error of errors">
+        {{ error }}
+      </li>
+    </ul>
+  </div>
+</div>

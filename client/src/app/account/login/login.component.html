@@ -9,6 +9,13 @@
                  
             <button [disabled]="loginForm.invalid" class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>           
         </form>
+        <hr>
+        <div>
+            <h2>External Providers</h2>
+            <div style="padding: 20px;">
+                <button class="btn btn-info" type="button" (click)="externalLogin()">Google</button>
+            </div>
+        </div>
     </div>   
 </div>
 

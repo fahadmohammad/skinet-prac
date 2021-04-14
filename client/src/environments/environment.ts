@@ -4,7 +4,9 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'https://localhost:5001/api/'
+  apiUrl: 'https://localhost:5001/api/',
+  googleClientId:'168152023048-8vjcmag46g0tedhm26nl5nppvtdrg7lh.apps.googleusercontent.com',
+  emailConfirmationCallback:'http://localhost:4200/account/emailconfirmation'
 };
 
 /*

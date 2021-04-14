@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { SocialUser } from 'angularx-social-login';
+import { externalAuthDto } from 'src/app/shared/models/ExternalAuthDto ';
 import { AccountService } from '../account.service';
 
 @Component({
@@ -33,6 +35,29 @@ export class LoginComponent implements OnInit {
       this.router.navigateByUrl(this.returnUrl);
     }, error => {
       console.log('Error');
+    });
+  }
+
+  public externalLogin = () => {
+    //this.showError = false;
+    this.accountService.signInWithGoogle()
+    .then(res => {
+      const user: SocialUser = { ...res };
+      console.log(user);
+      const externalAuth: externalAuthDto = {
+        provider: user.provider,
+        idToken: user.idToken
+      }
+      this.validateExternalAuth(externalAuth);
+    }, error => console.log(error))
+  }
+
+  private validateExternalAuth(externalAuth: externalAuthDto) {
+    this.accountService.externalLogin(externalAuth).subscribe(() => {
+      this.router.navigateByUrl(this.returnUrl);
+    }, error => {
+      console.log('Error');
+      this.accountService.signOutExternal();
     });
   }
 

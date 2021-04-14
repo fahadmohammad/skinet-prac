@@ -15,5 +15,6 @@ namespace API.Dtos
 
         [Required]
         public string DisplayName { get; set; }
+        public string clientUri { get; set; }
     }
 }

@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { of, timer } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { AccountService } from '../account.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-register',
@@ -28,13 +29,15 @@ export class RegisterComponent implements OnInit {
       email: [null, [Validators.required, Validators
         .pattern('^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$')],
         [this.validateEmailNotTaken()]],
-      password: [null, [Validators.required]]
+      password: [null, [Validators.required]],
+      clientUri: environment.emailConfirmationCallback
     });
   }
 
   onSubmit() {
     this.accountService.register(this.registerForm.value).subscribe(response => {
-      this.router.navigateByUrl('/shop');
+      //this.router.navigateByUrl('/shop');
+      this.router.navigateByUrl('/account/postregistration');
     }, error => {
       console.log(error);
       this.errors = error.errors;

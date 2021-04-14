@@ -1,17 +1,22 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using API.Dtos;
 using API.Errors;
 using API.Extensions;
+using API.MailService;
+using API.ThirdPartyAuth;
 using AutoMapper;
 using Core.Entities.Identity;
 using Core.Interfaces;
+using Google.Apis.Auth;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace API.Controllers
 {
@@ -22,15 +27,19 @@ namespace API.Controllers
         private readonly SignInManager<AppUser> _signInManager;
         private readonly ITokenService _tokenService;
         private readonly IMapper _mapper;
+        private readonly IGoogleAuth _googleAuth;
+        private readonly IMailService _mailService;
         public AccountController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager,
             SignInManager<AppUser> signInManager, ITokenService tokenService,
-            IMapper mapper)
+            IMapper mapper, IGoogleAuth googleAuth, IMailService mailService)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _roleManager = roleManager;
             _tokenService = tokenService;
             _mapper = mapper;
+            _googleAuth = googleAuth;
+            _mailService = mailService;
         }
 
         [Authorize]
@@ -38,7 +47,10 @@ namespace API.Controllers
         public async Task<ActionResult<UserDto>> GetCurrentUserAsync()
         {
             var user = await _userManager.FindByEmailFromClaimsPrinciple(HttpContext.User);
-
+            if (user == null)
+            {
+                return BadRequest("User not found");
+            }
             return new UserDto
             {
                 Email = user.Email,
@@ -83,6 +95,9 @@ namespace API.Controllers
 
             if (user == null) return Unauthorized(new ApiResponse(401));
 
+            if (!await _userManager.IsEmailConfirmedAsync(user))
+                return Unauthorized(new ApiResponse(401, "Email is not confirmed"));
+
             var signInResult = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password
                 , false);
 
@@ -99,10 +114,56 @@ namespace API.Controllers
             };
         }
 
-        [HttpPost("register")]
-        public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
+        [HttpPost("ExternalLogin")]
+        public async Task<ActionResult<UserDto>> ExternalLogin([FromBody] ExternalAuthDto externalAuth)
         {
+            GoogleJsonWebSignature.Payload payload = await _googleAuth.VerifyGoogleToken(externalAuth);
 
+            if (payload == null)
+                return BadRequest("Invalid External Authentication.");
+
+            var info = new UserLoginInfo(externalAuth.Provider, payload.Subject, externalAuth.Provider);
+
+            var user = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+
+            if (user == null)
+            {
+                user = await _userManager.FindByEmailAsync(payload.Email);
+
+                if (user == null)
+                {
+                    user = new AppUser { Email = payload.Email, UserName = payload.Email, DisplayName = payload.Name };
+                    await _userManager.CreateAsync(user);
+
+                    //prepare and send an email for the email confirmation
+
+                    await _userManager.AddToRoleAsync(user, "User");
+                    await _userManager.AddLoginAsync(user, info);
+                }
+                else
+                {
+                    await _userManager.AddLoginAsync(user, info);
+                }
+            }
+
+            if (user == null)
+                return BadRequest("Invalid External Authentication.");
+
+            var roleList = await _userManager.GetRolesAsync(user);
+
+            return new UserDto
+            {
+                Email = user.Email,
+                Token = await _tokenService.CreateToken(user),
+                DisplayName = user.DisplayName,
+                Roles = roleList.ToList()
+            };
+
+        }
+
+        [HttpPost("register")]
+        public async Task<ActionResult> Register(RegisterDto registerDto)
+        {
             if (CheckEmailExistAsync(registerDto.Email).Result.Value)
             {
                 return new BadRequestObjectResult(new ApiValidationErrorResponse
@@ -121,8 +182,36 @@ namespace API.Controllers
 
             if (!result.Succeeded) return BadRequest(new ApiResponse(400));
 
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var param = new Dictionary<string, string>
+            {
+                {"token",token},
+                {"email",user.Email}
+            };
+
+            var callback = QueryHelpers.AddQueryString(registerDto.clientUri, param);
+            var mailRequest = new MailRequest();
+            mailRequest.ToEmail = registerDto.Email;
+            mailRequest.Subject = "Account Activation";
+            mailRequest.Body = callback;
+
+            await _mailService.SendEmailAsync(mailRequest);
+            //System.IO.File.WriteAllText(@"E:\EAPP-Learning\MySource\Temp\email.txt", callback);
+
             await _userManager.AddToRoleAsync(user, AppIdentityDbContextSeed.AppRoles.User.ToString());
 
+            return Ok();
+        }
+
+        [HttpGet("EmailConfirmation")]
+        public async Task<ActionResult<UserDto>> EmailConfirmation([FromQuery] string email, [FromQuery] string token)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return BadRequest("Invalid Email Confirmation Request");
+            var confirmResult = await _userManager.ConfirmEmailAsync(user, token);
+            if (!confirmResult.Succeeded)
+                return BadRequest("Invalid Email Confirmation Request");
             var roleList = await _userManager.GetRolesAsync(user);
 
             return new UserDto

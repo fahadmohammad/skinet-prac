@@ -20,11 +20,22 @@ namespace API.Extensions
             builder.AddRoles<IdentityRole>();
             builder.AddEntityFrameworkStores<AppIdentityDbContext>();
             builder.AddSignInManager<SignInManager<AppUser>>();
+            builder.AddDefaultTokenProviders();
+
+            services.Configure<DataProtectionTokenProviderOptions>(options =>
+                            options.TokenLifespan = System.TimeSpan.FromHours(2));
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddGoogle(options =>
+                {
+                    var googleAuth = config.GetSection("Authentication:Google");
+
+                    options.ClientId = googleAuth["ClientId"];
+                    options.ClientSecret = googleAuth["ClientSecret"];
+                    options.SignInScheme = IdentityConstants.ExternalScheme;
+                })
                 .AddJwtBearer(options =>
                 {
-
                     options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                     {
                         ValidateIssuerSigningKey = true,
@@ -37,6 +48,10 @@ namespace API.Extensions
                 });
 
             return services;
+        }
+
+        private class TimeSpan
+        {
         }
     }
 }
