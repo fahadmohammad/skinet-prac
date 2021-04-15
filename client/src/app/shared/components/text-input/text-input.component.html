@@ -22,4 +22,8 @@
    && !controlDir.control.valid && controlDir.control.dirty)">
     <span *ngIf="controlDir.control.errors?.emailExists">Email Already in Use</span>
    </div>
+   <div class="invalid-feedback d-block"  *ngIf="(controlDir && controlDir.control
+   && !controlDir.control.valid && controlDir.control.dirty)">
+    <span *ngIf="controlDir.control.errors?.emailNotExists">Email Not Found</span>
+   </div>
 </div>

@@ -190,13 +190,15 @@ namespace API.Controllers
             };
 
             var callback = QueryHelpers.AddQueryString(registerDto.clientUri, param);
-            var mailRequest = new MailRequest();
-            mailRequest.ToEmail = registerDto.Email;
-            mailRequest.Subject = "Account Activation";
-            mailRequest.Body = callback;
+
+            var mailRequest = new MailRequest()
+            {
+                ToEmail = user.Email,
+                Subject = "Account Activation",
+                Body = callback
+            };
 
             await _mailService.SendEmailAsync(mailRequest);
-            //System.IO.File.WriteAllText(@"E:\EAPP-Learning\MySource\Temp\email.txt", callback);
 
             await _userManager.AddToRoleAsync(user, AppIdentityDbContextSeed.AppRoles.User.ToString());
 
@@ -221,6 +223,68 @@ namespace API.Controllers
                 DisplayName = user.DisplayName,
                 Roles = roleList.ToList()
             };
+        }
+
+        [HttpPost("ForgotPassword")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            var user = await _userManager.FindByEmailAsync(forgotPasswordDto.Email);
+            if (user == null)
+                return BadRequest("Invalid Request");
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var param = new Dictionary<string, string>
+            {
+                {"token", token },
+                {"email", forgotPasswordDto.Email }
+            };
+
+            var callback = QueryHelpers.AddQueryString(forgotPasswordDto.ClientUri, param);
+
+            var mailRequest = new MailRequest()
+            {
+                ToEmail = user.Email,
+                Subject = "Password Reset link",
+                Body = callback
+            };
+
+            await _mailService.SendEmailAsync(mailRequest);
+
+            return Ok();
+        }
+
+        [HttpPost("ResetPassword")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
+            var user = await _userManager.FindByEmailAsync(resetPasswordDto.Email);
+
+            if (user == null)
+            {
+                return new BadRequestObjectResult(new ApiValidationErrorResponse
+                {
+                    Errors = new[] { "Invalid Request" }
+                });
+            }
+
+            var resetPassResult = await _userManager.ResetPasswordAsync(user, resetPasswordDto.Token, resetPasswordDto.Password);
+
+            if (!resetPassResult.Succeeded)
+            {
+                var errors = resetPassResult.Errors.Select(e => e.Description);
+
+                return new BadRequestObjectResult(new ApiValidationErrorResponse
+                {
+                    Errors = errors
+                });
+            }
+
+            return Ok();
         }
 
         [HttpPost("add-role")]

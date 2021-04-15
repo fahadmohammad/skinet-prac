@@ -6,11 +6,14 @@ import { AccountRoutingModule } from './account-routing.module';
 import { SharedModule } from '../shared/shared.module';
 import { EmailConfirmationComponent } from './email-confirmation/email-confirmation.component';
 import { PostRegistrationComponent } from './post-registration/post-registration.component';
+import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './reset-password/reset-password.component';
+
 
 
 
 @NgModule({
-  declarations: [LoginComponent, RegisterComponent, EmailConfirmationComponent, PostRegistrationComponent],
+  declarations: [LoginComponent, RegisterComponent, EmailConfirmationComponent, PostRegistrationComponent, ForgotPasswordComponent, ResetPasswordComponent],
   imports: [
     CommonModule,
     AccountRoutingModule,

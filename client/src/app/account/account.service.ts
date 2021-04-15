@@ -103,6 +103,14 @@ export class AccountService {
     );
   }
 
+  forgotPassword(values: any) {
+    return this.http.post(this.baseUrl + 'account/forgotpassword', values)
+  }
+
+  resetPassword(values: any) {
+    return this.http.post(this.baseUrl + 'account/resetpassword', values)
+  }
+
   logout() {
     localStorage.removeItem('token');
     this.currentUserSource.next(null);
