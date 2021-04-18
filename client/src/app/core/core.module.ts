@@ -10,7 +10,7 @@ import { SectionHeaderComponent } from './section-header/section-header.componen
 import { BreadcrumbModule } from 'xng-breadcrumb';
 import { SharedModule } from '../shared/shared.module';
 import { NgxNavbarModule } from 'ngx-bootstrap-navbar';
-
+import { CollapseModule } from 'ngx-bootstrap/collapse';
 
 @NgModule({
   declarations: [NavBarComponent, TestErrorComponent, NotFoundComponent, ServerErrorComponent,
@@ -20,7 +20,8 @@ import { NgxNavbarModule } from 'ngx-bootstrap-navbar';
     RouterModule,
     BreadcrumbModule,
     SharedModule,
-    NgxNavbarModule,  
+    NgxNavbarModule, 
+    CollapseModule, 
     ToastrModule.forRoot({
       positionClass: 'toast-bottom-right',
       preventDuplicates: true
