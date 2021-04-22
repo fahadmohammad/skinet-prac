@@ -19,20 +19,27 @@ namespace Infrastructure.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<DeliveryMethod> DeliveryMethods { get; set; }
+        public DbSet<Vendor> Vendors { get; set; }
+        public DbSet<Media> Medias { get; set; }
+        public DbSet<Review> Reviews { get; set; }
+        public DbSet<Inventory> Inventories { get; set; }
+        public DbSet<ProductAttribute> ProductAttributes { get; set; }
+        public DbSet<ProductCategory> ProductCategories { get; set; }
+        public DbSet<Comment> Comments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
-            if(Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
+            if (Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
             {
-                foreach(var entityType in builder.Model.GetEntityTypes())
+                foreach (var entityType in builder.Model.GetEntityTypes())
                 {
                     var properties = entityType.ClrType.GetProperties().Where
                         (p => p.PropertyType == typeof(decimal));
 
-                    foreach(var property in properties)
+                    foreach (var property in properties)
                     {
                         builder.Entity(entityType.Name).
                             Property(property.Name).HasConversion<double>();
@@ -40,8 +47,8 @@ namespace Infrastructure.Data
 
                     var dateTimeProperties = entityType.ClrType.GetProperties()
                         .Where(p => p.PropertyType == typeof(DateTimeOffset));
-                    
-                    foreach(var property in dateTimeProperties)
+
+                    foreach (var property in dateTimeProperties)
                     {
                         builder.Entity(entityType.Name)
                             .Property(property.Name).HasConversion(new DateTimeOffsetToBinaryConverter());

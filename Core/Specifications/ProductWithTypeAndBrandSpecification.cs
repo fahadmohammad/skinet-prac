@@ -10,12 +10,12 @@ namespace Core.Specifications
             :base(x => 
                 (string.IsNullOrEmpty(productSpecParam.Search)|| x.Name.ToLower().Contains
                 (productSpecParam.Search))&&
-                (!productSpecParam.TypeId.HasValue || x.ProductTypeId == productSpecParam.TypeId) && 
+                // (!productSpecParam.TypeId.HasValue || x.ProductTypeId == productSpecParam.TypeId) && 
                 (!productSpecParam.BrandId.HasValue || x.ProductBrandId == productSpecParam.BrandId)                
             )
         {
             AddInclude(x => x.ProductBrand);
-            AddInclude(x => x.ProductType);
+            //AddInclude(x => x.ProductType);
             AddOrderBy(x => x.Name);
             ApplyPaging(productSpecParam.PageSize * (productSpecParam.PageIndex-1),
                 productSpecParam.PageSize);
@@ -42,7 +42,7 @@ namespace Core.Specifications
             : base(x => x.Id == id)
         {
             AddInclude(x => x.ProductBrand);
-            AddInclude(x => x.ProductType);
+            //AddInclude(x => x.ProductType);
         }
     }
 }
